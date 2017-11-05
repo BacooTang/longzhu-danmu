@@ -1,0 +1,28 @@
+{
+  "name": "longzhu-danmu",
+  "version": "1.0.0",
+  "description": "longzhu danmu module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BacooTang/longzhu-danmu.git"
+  },
+  "keywords": [
+    "longzhu",
+    "danmu"
+  ],
+  "author": "BacooTang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BacooTang/longzhu-danmu/issues"
+  },
+  "dependencies": {
+    "ws": "*",
+    "request": "*",
+    "request-promise": "*"
+  },
+  "homepage": "https://github.com/BacooTang/longzhu-danmu#readme"
+}

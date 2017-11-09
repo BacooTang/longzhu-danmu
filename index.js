@@ -4,7 +4,7 @@ const request = require('request-promise')
 const REQUEST_TIMEOUT = 10000
 const REFRESH_GIFT_INFO_INTERVAL = 30 * 60 * 1000
 
-//http://roomapicdn.plu.cn/room/roomstatus?roomid=${this._roomid}  主播状态
+//http://roomapicdn.plu.cn/room/roomstatus?roomid=${this._uid}  主播状态
 
 class longzhu_danmu extends events {
     constructor(roomid) {
@@ -52,7 +52,7 @@ class longzhu_danmu extends events {
         }
     }
 
-    async _get_room_info() {
+    async _get_room_uid() {
         let opt = {
             url: `http://searchapi.plu.cn/api/search/room?title=${this._roomid}&pageSize=1`,
             timeout: REQUEST_TIMEOUT,
@@ -72,12 +72,11 @@ class longzhu_danmu extends events {
 
 
     async start() {
-        let roomid = await this._get_room_info()
-        if (!roomid) {
+        this._uid = await this._get_room_uid()
+        if (!this._uid) {
             this.emit('error', new Error('Fail to get room id'))
             return this.emit('close')
         }
-        this._roomid = roomid
         this._gift_info = await this._get_gift_info()
         if (!this._gift_info) {
             this.emit('error', new Error('Fail to get gift info'))
@@ -98,7 +97,7 @@ class longzhu_danmu extends events {
     }
 
     _start_ws_chat() {
-        this._client_chat = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._roomid}&batch=1&group=0&connType=1`, {
+        this._client_chat = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._uid}&batch=1&group=0&connType=1`, {
             perMessageDeflate: false
         })
         this._client_chat.on('open', () => {
@@ -115,7 +114,7 @@ class longzhu_danmu extends events {
     }
 
     _start_ws_other() {
-        this._client_other = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._roomid}&batch=1&group=0&connType=2`, {
+        this._client_other = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._uid}&batch=1&group=0&connType=2`, {
             perMessageDeflate: false
         })
         this._client_other.on('open', () => {

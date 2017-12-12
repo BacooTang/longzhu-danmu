@@ -4,8 +4,6 @@ const request = require('request-promise')
 const REQUEST_TIMEOUT = 10000
 const REFRESH_GIFT_INFO_INTERVAL = 30 * 60 * 1000
 
-//http://roomapicdn.plu.cn/room/roomstatus?roomid=${this._uid}  主播状态
-
 class longzhu_danmu extends events {
     constructor(roomid) {
         super()
@@ -54,7 +52,7 @@ class longzhu_danmu extends events {
 
     async _get_room_uid() {
         let opt = {
-            url: `http://searchapi.plu.cn/api/search/room?title=${this._roomid}&pageSize=1`,
+            url: `http://m.longzhu.com/${this._roomid}`,
             timeout: REQUEST_TIMEOUT,
             json: true,
             gzip: true
@@ -64,7 +62,9 @@ class longzhu_danmu extends events {
             if (!body) {
                 return null
             }
-            return body.items[0].id
+            let uid_array = body.match(/var roomId = (\d+);/)
+            if (!uid_array) return null
+            return uid_array[1]
         } catch (e) {
             return null
         }
@@ -72,15 +72,21 @@ class longzhu_danmu extends events {
 
 
     async start() {
-        this._uid = await this._get_room_uid()
+        if (this._starting) return
+        this._starting = true
         if (!this._uid) {
-            this.emit('error', new Error('Fail to get room id'))
-            return this.emit('close')
+            this._uid = await this._get_room_uid()
+            if (!this._uid) {
+                this.emit('error', new Error('Fail to get room id'))
+                return this.emit('close')
+            }
         }
-        this._gift_info = await this._get_gift_info()
         if (!this._gift_info) {
-            this.emit('error', new Error('Fail to get gift info'))
-            return this.emit('close')
+            this._gift_info = await this._get_gift_info()
+            if (!this._gift_info) {
+                this.emit('error', new Error('Fail to get gift info'))
+                return this.emit('close')
+            }
         }
         this._refresh_gift_info_timer = setInterval(this._refresh_gift_info.bind(this), REFRESH_GIFT_INFO_INTERVAL);
         this._start_ws_chat()

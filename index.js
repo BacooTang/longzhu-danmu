@@ -1,13 +1,26 @@
 const ws = require('ws')
 const events = require('events')
 const request = require('request-promise')
+const socks_agent = require('socks-proxy-agent')
 const REQUEST_TIMEOUT = 10000
 const REFRESH_GIFT_INFO_INTERVAL = 30 * 60 * 1000
 
 class longzhu_danmu extends events {
-    constructor(roomid) {
+    constructor(roomid, proxy) {
         super()
         this._roomid = roomid
+        this.set_proxy(proxy)
+    }
+
+    set_proxy(proxy) {
+        this._agent = null
+        if (proxy) {
+            let auth = ''
+            if (proxy.name && proxy.pass)
+                auth = `${proxy.name}:${proxy.pass}@`
+            let socks_url = `socks://${auth}${proxy.ip}:${proxy.port || 8080}`
+            this._agent = new socks_agent(socks_url)
+        }
     }
 
     async _get_gift_info() {
@@ -15,7 +28,8 @@ class longzhu_danmu extends events {
             url: 'http://configapi.plu.cn/item/getallitems',
             timeout: REQUEST_TIMEOUT,
             json: true,
-            gzip: true
+            gzip: true,
+            agent: this._agent
         }
         try {
             let body = await request(opt)
@@ -55,7 +69,8 @@ class longzhu_danmu extends events {
             url: `http://m.longzhu.com/${this._roomid}`,
             timeout: REQUEST_TIMEOUT,
             json: true,
-            gzip: true
+            gzip: true,
+            agent: this._agent
         }
         try {
             let body = await request(opt)
@@ -104,7 +119,8 @@ class longzhu_danmu extends events {
 
     _start_ws_chat() {
         this._client_chat = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._uid}&batch=1&group=0&connType=1`, {
-            perMessageDeflate: false
+            perMessageDeflate: false,
+            agent: this._agent
         })
         this._client_chat.on('open', () => {
             this.emit('connect')
@@ -121,7 +137,8 @@ class longzhu_danmu extends events {
 
     _start_ws_other() {
         this._client_other = new ws(`ws://mbgows.plu.cn:8805/?room_id=${this._uid}&batch=1&group=0&connType=2`, {
-            perMessageDeflate: false
+            perMessageDeflate: false,
+            agent: this._agent
         })
         this._client_other.on('open', () => {
             this.emit('connect')

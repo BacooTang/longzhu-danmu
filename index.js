@@ -214,6 +214,7 @@ class longzhu_danmu extends events {
                     },
                     count: msg.msg.number,
                     price: msg.msg.number * gift_price,
+                    earn: msg.msg.number * gift_price * 0.01,
                     gift_type: gift_type,
                     id: msg.id + '',
                     raw: msg

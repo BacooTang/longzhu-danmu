@@ -4,7 +4,6 @@ const request = require('request-promise')
 const socks_agent = require('socks-proxy-agent')
 
 const timeout = 30000
-const close_delay = 100
 const fresh_gift_interval = 60 * 60 * 1000
 const r = request.defaults({ json: true, gzip: true, timeout: timeout })
 

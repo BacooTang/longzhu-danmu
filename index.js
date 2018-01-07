@@ -1,5 +1,4 @@
 const ws = require('ws')
-const delay = require('delay')
 const events = require('events')
 const request = require('request-promise')
 const socks_agent = require('socks-proxy-agent')
@@ -61,7 +60,6 @@ class longzhu_danmu extends events {
         if (this._starting) return
         this._connect_count = 0
         this._starting = true
-        this._reconnect = true
         this._uid = this._uid || await this._get_room_uid()
         if (!this._uid) return this.emit('close')
         this._gift_info || await this._fresh_gift_info()
@@ -191,12 +189,9 @@ class longzhu_danmu extends events {
         this._client_chat && this._client_chat.terminate()
         this._client_other && this._client_other.terminate()
         this.emit('close')
-        await delay(close_delay)
-        this._reconnect && this.start()
     }
 
     stop() {
-        this._reconnect = false
         this.removeAllListeners()
         this._stop()
     }

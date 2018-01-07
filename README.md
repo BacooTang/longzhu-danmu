@@ -2,7 +2,7 @@
 
 longzhu-danmu 是Node.js版本龙珠TV弹幕监听模块。
 
-简单易用，使用不到三十行代码，你就可以使用Node.js基于弹幕进一步开发。
+简单易用，使用三十行左右代码，你就可以使用Node.js基于弹幕进一步开发。
 
 ## Installation
 
@@ -18,7 +18,7 @@ npm install longzhu-danmu --save
 
 ```javascript
 const longzhu_danmu = require('longzhu-danmu')
-const roomid = 'xuxubaobao'
+const roomid = '777777'
 const client = new longzhu_danmu(roomid)
 
 client.on('connect', () => {
@@ -26,15 +26,15 @@ client.on('connect', () => {
 })
 
 client.on('message', msg => {
-    switch(msg.type){
+    switch (msg.type) {
         case 'chat':
             console.log(`[${msg.from.name}]:${msg.content}`)
             break
         case 'gift':
             console.log(`[${msg.from.name}]->赠送${msg.count}个${msg.name}`)
             break
-        default:
-            //do what you like
+        case 'longdou':
+            console.log(`[${msg.from.name}]->赠送${msg.count}个${msg.name}`)
             break
     }
 })
@@ -58,6 +58,16 @@ client.start()
 const longzhu_danmu = require('longzhu-danmu')
 const roomid = 'xuxubaobao'
 const client = new longzhu_danmu(roomid)
+client.start()
+```
+
+### 使用socks5代理监听
+
+```javascript
+const longzhu_danmu = require('longzhu-danmu')
+const roomid = '666666'
+const proxy = 'socks://name:pass@127.0.0.1:1080'
+const client = new longzhu_danmu({roomid,proxy})
 client.start()
 ```
 
@@ -87,18 +97,10 @@ client.on('close', () => {
 })
 ```
 
-### 断线重连
-
-```javascript
-client.on('close', () => {
-    client.start()
-})
-```
-
 ### msg对象
 
-msg对象type有chat,gift,other五种值
-分别对应聊天内容、礼物、其他
+msg对象type有chat,gift,longdou五种值
+分别对应聊天内容、礼物、龙豆礼物
 
 #### chat消息
 ```javascript
@@ -111,9 +113,8 @@ msg对象type有chat,gift,other五种值
             level: '发送者等级,Number',
             plat: '发送者平台(android,ios,pc_web),String'
         },
-        content: '聊天内容,String',
         id: '消息唯一id,String',
-        raw: '原始消息,Object'
+        content: '聊天内容,String'
     }
 ```
 
@@ -128,21 +129,25 @@ msg对象type有chat,gift,other五种值
             rid: '发送者rid,String',
             level: '发送者等级,Number'
         },
-        count: '礼物数量,Number',
-        price: '礼物总价值(根据gift_type),Number',
-        gift_type: '礼物种类(龙币，龙豆..),String',
         id: '消息唯一id,String',
-        raw: '原始消息,Object'
+        count: '礼物数量,Number',
+        price: '礼物总价值(单位龙币),Number',
+        earn: '礼物总价值(单位元),Number'
     }
 ```
 
-
-#### other消息
+#### longdou消息
 ```javascript
     {
-        type: 'other',
+        type: 'longdou',
         time: '毫秒时间戳,Number',
+        name: '礼物名称,String',
+        from: {
+            name: '发送者昵称,String',
+            rid: '发送者rid,String',
+            level: '发送者等级,Number'
+        },
         id: '消息唯一id,String',
-        raw: '原始消息,Object'
+        count: '礼物数量,Number'
     }
 ```
